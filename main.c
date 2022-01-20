@@ -177,34 +177,20 @@ int main(int argc, char const *argv[])
 
 int parse_int(char number[MAX_SIZE])
 {
-    char snumber[] = "0123456789";
-
-    int length_snumber = strlen(snumber);
-
     int inumber = ERROR_CODE;
 
-    /*On parcours les elements du supposer nombre*/
     for(int i = 0; i < strlen(number); ++i)
     {
-    	for(int ii = 0; ii < length_snumber; ++ii)
+    	// We verify if the character is a number
+    	if(number[i] >= '0' && number[i] <= '9')
     	{
-    		// We verify if the character is a number
-    		if(number[i] == snumber[ii])
-    		{
-    			/*Comme il est entier*/
-    			/*On met inumber a 0 si ERROR_CODE enfin de retrouver le nombre chercher*/
-    			if (inumber == ERROR_CODE)
-    				inumber = 0;
-    			/*On ajoute chaque element du nombre a partir de l unite*/
-    			/*Exemple: 1 => 12 => 123 => 1234*/
-    			inumber = inumber * 10 + ii;
-    			/*On arrete le parcour d element de la base decimal*/
-    			/*Enfin de passer a l element suivant du suppose nombre*/
-    			break;
-    		}
+    		if (inumber == ERROR_CODE)
+    			inumber = 0;
+
+    		inumber = inumber * 10 + number[i] - '0';
     	}
     }
-    /*On renvoi le resultat final*/
+
     return inumber;
 }
 
