@@ -7,241 +7,218 @@
 /*On defini le code d'erreur qui sera utiliser pour signaler une erreur*/
 #define ERROR_CODE -1
 
-/*On defini la structure Student*/
+// We define the structure student
 typedef struct
 {
-	char name[50];
-	char first_name[50];
+	char* name;
+	char* first_name;
 	int year;
 	int month;
 	int day;
-	char filiere[50];
-	char level[50];
+	char* department;
+	char* level;
 } Student;
 
 
-/*On defini la structure Subject*/
+// We define the structure course
 typedef struct
 {
-	char name[50];
+	char* name;
 	int coef;
-} Subject;
+} Course;
 
-/*On defini la structure Note*/
+// We define the structure note
 typedef struct
 {
-	int subject_id;
+	int course_id;
 	int student_id;
 	int note;
 } Note;
 
-/*On defini la structure Moyenne*/
+// We define the structure average
 typedef struct
 {
-	int nb_subject;
+	int nb_courses;
 	int note_total;
 	int coef_total;
-	float moyenne;
-} Moyenne;
+	float average;
+} Average;
 
-/*Fonction permettant d'avoir la valeur en entier d'un nombre de type char*/
-int char_to_int(char number[MAX_SIZE]);
+int nb_students = 0;
 
-/*Fonction qui demande l'utilisateur d entree un entier*/
-int get_int(void);
+int nb_courses = 0;
 
-/*Fonction qui permet d'obtenir un entier dans un interval donnee*/
+int nb_notes = 0;
+
+Student students[MAX_SIZE];
+
+Course courses[MAX_SIZE];
+
+Note notes[MAX_SIZE];
+
+// This function permit to parse an integer from a string
+int parse_int(char* number);
+
+// This function get an integer from the user
+int get_int(int length);
+
+// This function get a string from the user
+char* get_string(int length);
+
+// This function permit to get an integer in a closed interval
 int get_int_in(int min, int max);
 
-/*Fonction qui permet d'ajouter un etudiant*/
-void add_student(Student students[MAX_SIZE], int next_position_student);
+// This function permit to add a new student
+void add_student();
 
-/*Fonction qui permet d'ajouter une matiere*/
-void add_subject(Subject subjects[MAX_SIZE], int next_position_subject);
+// This function permit to add a new course
+void add_course();
 
-/*Fonction qui permet de choisir une matiere*/
-int choose_subject(Subject subjects[MAX_SIZE], int nb_subject);
+// This function permit to select a course
+int choose_course();
 
-/*Fonction qui permet de choisir un etudiant*/
-int choose_student(Student students[MAX_SIZE], int nb_student);
+// This function permit to select a student
+int choose_student();
 
-/*Fonction qui permet d'inscrire un etudiant dans une matiere*/
-void signin_subject(Note notes[MAX_SIZE], int next_position_note, int subject_id, int student_id);
+// This function permit to register a student in a course
+void register_course(int course_id, int student_id);
 
-/*Fonction qui permet d'assigner une note a un etudiant*/
-void add_note(Note notes[MAX_SIZE], int next_position_note, int subject_id, int student_id);
+// This function permit to assign a note to a student
+void assign_note(int course_id, int student_id);
 
-void show_student(int student_id, Student students[MAX_SIZE], Subject subjects[MAX_SIZE], Note notes[MAX_SIZE], int next_position_note);
+// This function permit to show the information of a student
+void print_student(int student_id, FILE* out);
 
-/*Fonction qui permet de sauvegarder les donnees d'un etudiant*/
-void save(Student students[MAX_SIZE], Subject subjects[MAX_SIZE], Note notes[MAX_SIZE], int student_id, int next_position_note);
+// This function permit to export the data of a student
+void save(int student_id);
 
-/*Fonction principale du programme*/
-int main(int argc, char const *argv[])
+
+int main(int argc, char const* argv[])
 {
-	/*On declare un ttableau students qui representera les etudiants*/
-	Student students[MAX_SIZE];
-	/*On declare une tableau subjects qui representera les matieres*/
-	Subject subjects[MAX_SIZE];
-	/*On declare un tableau notes qui representera les notes*/
-	/* des differentes matieres de chaque etudiant*/
-	Note notes[MAX_SIZE];
-	/*On declare une variable option qui stockera un choix utilisateur*/
-	int option = 0;
-	/*On delcare une variable entry1 qui stockera une entree clavier*/
+	int choice = 0;
 	int entry1;
-	/*On delcare une variable entry2 qui stockera une entree clavier*/
 	int entry2;
-	/*On delcare une variable next_position_student qui nous permettra*/
-	/* de connaitre la prochaine position libre dans le tableau students*/
-	int next_position_student = 0;
-	/*On delcare une variable next_position_subject qui nous permettra*/
-	/* de connaitre la prochaine position libre dans le tableau subjects*/
-	int next_position_subject = 0;
-	/*On delcare une variable next_position_note qui nous permettra*/
-	/* de connaitre la prochaine position libre dans le tableau notes*/
-	int next_position_note = 0;
-	/*On affiche les indications a l'utilisateur*/
-	printf("Programme qui enregistre des etudiants\n");
-	printf("Permet d'enregister:\n");
-	printf("Max %d etudiants\n", MAX_SIZE);
-	printf("Max %d subjects\n", MAX_SIZE);
+
+	// We show some important information
+	printf("Student Management System\n");
+	printf("Max %d students\n", MAX_SIZE);
+	printf("Max %d courses\n", MAX_SIZE);
 	printf("Max %d notes\n", MAX_SIZE);
 	printf("--------------------\n");
-	/*On affiche les differents commande que l'utilisateur peut utiliser*/
-	printf("Command:\n");
-	printf("\t0 pour quitter\n");
-	printf("\t1 pour ajouter un etudiant\n");
-	printf("\t2 pour ajouter une matiere\n");
-	printf("\t3 pour ajouter une matiere a un etudiant\n");
-	printf("\t4 pour donner/changer une note a un etudiant\n");
-	printf("\t5 pour afficher les infos d'un etudiant\n");
-	printf("\t10 pour afficher les infos d'un etudiant\n");
+
 	while (1)
 	{
-		printf("choix (entier uniquement): ");
-		/*On recupere une entree de la base decimal*/
-		option=get_int();
-		/*On va faire une analyse de cas*/
-		switch(option)
+		// We show the menu
+		printf("Command:\n");
+		printf("\t0 to exit\n");
+		printf("\t1 to add a student\n");
+		printf("\t2 to add a course\n");
+		printf("\t3 to registered a student in a course\n");
+		printf("\t4 to assign a note to a student\n");
+		printf("\t5 to print student's info\n");
+		printf("\t10 to export student's info\n");
+
+		printf("Choice: ");
+		
+		// we get the user choice
+		choice = get_int(2);
+
+		// we analyze the choice
+		switch(choice)
 		{
 			case 1:
-				/*On demande a l'utilisateur d'ajouter un etudiant*/
-				add_student(students, next_position_student);
-				/*Apres on incremente la prochaine position libre du tableau students*/
-				next_position_student++;
+				add_student();
 				break;
 			case 2:
-				/*On demande a l'utilisateur d'ajouter une matiere*/
-				add_subject(subjects, next_position_subject);
-				/*Apres on incremente la prochaine position libre du tableau subjects*/
-				next_position_subject++;
+				add_course();
 				break;
-			case 3: case 4:/*Ici on evalu le cas 3 et 4 en une fois*/
-				/*On demande a l'utilisateur de choisir une matiere*/
-			    entry1 = choose_subject(subjects, next_position_subject);
-			    /*On demande a l'utilisateur de choisir un etudiant*/
-				entry2 = choose_student(students, next_position_student);
-				/*On verifie si les fonctions n'on pas renvoyer d'erreur*/
+			case 3: case 4:
+			    entry1 = choose_course();
+				entry2 = choose_student();
+
 				if (entry1 != ERROR_CODE & entry2 != ERROR_CODE)
 				{
-					/*On execute une insctruction pour chaque cas*/
-					if (option == 3)
+					if (choice == 3)
 					{
-						/*On inscris un etudiant dans une matiere*/
-						signin_subject(notes, next_position_note, entry1, entry2);
-						/*Apres on incremente la prochaine position libre du tableau notes*/
-						next_position_note++;
+						register_course(entry1, entry2);
 					}
 					else
 					{
-						/*On demande a l'utilisateur d'assigner une note a l'etudiant selectionner*/
-						add_note(notes, next_position_note, entry1, entry2);
+						assign_note(entry1, entry2);
 					}
 				}
 				break;
             case 5:
-                /*On demande a l'utilisateur de choisir un etudiant*/
-				entry1 = choose_student(students, next_position_student);
-				/*On verifie si la fonction choose_student n'a pas renvoyer d'erreur*/
+				entry1 = choose_student();
+
 				if (entry1 != ERROR_CODE)
 				{
-				    show_student(entry1, students, subjects, notes, next_position_note);
+				    print_student(entry1, stdout);
 				}
 				break;
 			case 10:
-				/*On demande a l'utilisateur de choisir un etudiant*/
-				entry1 = choose_student(students, next_position_student);
-				/*On verifie si la fonction choose_student n'a pas renvoyer d'erreur*/
+				printf("In development\n");
+
+				break;
+				entry1 = choose_student();
+
 				if (entry1 != ERROR_CODE)
 				{
-					/*On sauvegarde les donnees de l'etudiant selectionner*/
-					save(students, subjects, notes, entry1, next_position_note);
+					save(entry1);
 				}
 				break;
+			default:
+				printf("Choice not found.\n");
+				break;
 		}
-		if (option == 0)
+
+		if (choice == 0)
 		{
 			break;
 		}
 	}
-	printf("Merci d'avoir utiliser notre programme\n");
+
+	printf("Thanks to use our program.\n");
 	return 0;
 }
 
-int char_to_int(char number[MAX_SIZE])
+int parse_int(char* number)
 {
-	/*On declare les elements de la base decimal*/
-    char snumber[] = "0123456789";
-    /*On stocke la longueur des elements de la base decimal*/
-    int length_snumber = strlen(snumber);
-    /*On initie inumber a ERROR_CODE*/
-    /*Le ERROR_CODE permettra de savoir si un nombre a ete trouver ou pas*/
     int inumber = ERROR_CODE;
-    /*On stocke la longueur du supposer nombre*/
-    int length_number = strlen(number);
-    /*On parcours les elements du supposer nombre*/
-    for(int i = 0; i < length_number; ++i)
+
+    for(int i = 0; i < strlen(number); ++i)
     {
-    	/*On parcoure les element du de la base decimal*/
-    	for(int ii = 0; ii < length_snumber; ++ii)
+    	// We verify if the character is a number
+    	if(number[i] >= '0' && number[i] <= '9')
     	{
-    		/*On verifie si l element du suppose nombre est un nombre*/
-    		if(number[i] == snumber[ii])
-    		{
-    			/*Comme il est entier*/
-    			/*On met inumber a 0 si ERROR_CODE enfin de retrouver le nombre chercher*/
-    			if (inumber == ERROR_CODE)
-    				inumber = 0;
-    			/*On ajoute chaque element du nombre a partir de l unite*/
-    			/*Exemple: 1 => 12 => 123 => 1234*/
-    			inumber = inumber * 10 + ii;
-    			/*On arrete le parcour d element de la base decimal*/
-    			/*Enfin de passer a l element suivant du suppose nombre*/
-    			break;
-    		}
+    		if (inumber == ERROR_CODE)
+    			inumber = 0;
+
+    		inumber = inumber * 10 + number[i] - '0';
     	}
     }
-    /*On renvoi le resultat final*/
+
     return inumber;
 }
 
 
-int get_int(void)
+int get_int(int length)
 {
-	/*Le ERROR_CODE permettra de savoir si un nombre a ete trouver ou pas*/
-	int number = ERROR_CODE;
-	/*Variable qui stocke l'entree utilisateur*/
-	char entry[MAX_SIZE] = {};
-	/*Tant qu'on a pas d'entier on repete le processus*/
+	int number;
+
+	char* entry;
+
 	while(1)
 	{
-		scanf("%s", entry);
-		/*On fait la conversion de l'entree en entier*/
-		number=char_to_int(entry);
+		entry = get_string(length);
+		
+		// We parse the user input
+		number = parse_int(entry);
+
+		// We verify if error got
 		if(number == ERROR_CODE)
         {
-            printf("Please entrer un entier: ");
+            printf("Please enter an integer: ");
         }
         else
             break;
@@ -250,217 +227,230 @@ int get_int(void)
 	return number;
 }
 
+char* get_string(int length)
+{
+	char* temp = malloc(sizeof(char) * (length + 1));
+
+	while (strcmp(temp, "\n") == 0 || strcmp(temp, "") == 0)
+	{
+		fgets(temp, sizeof(char) * (length + 1), stdin);
+
+		// We remove the return line
+		*(temp + length) = '\0';
+	}
+
+	return temp;
+}
+
 int get_int_in(int min, int max)
 {
     int x;
+
     do
     {
-        x = get_int();
-        if(x == ERROR_CODE | x < min | x > max)
+        x = get_int(10);
+
+        // We verify if the integer is correct
+        if(x == ERROR_CODE || x < min || x > max)
         {
-            printf("Ce nombre doit etre compris entre %i et %i: ", min, max);
+            printf("This integer should be between %i and %i: ", min, max);
         }
         else
             break;
     } while(1);
 }
 
-void add_student(Student students[MAX_SIZE], int next_position_student)
+void add_student(Student* students)
 {
-	/*On affiche les consignes a l'utilisateur*/
-    printf("Entrer son nom: ");
-    scanf("%s", &students[next_position_student].name);
-	printf("Entrer son prenom: ");
-	scanf("%s", &students[next_position_student].first_name);
-	printf("Entrer sa date de naissance\n");
-	printf("\tJour (entier uniquement): ");
-	students[next_position_student].day = get_int_in(1,31);
-	printf("\tMois (entier uniquement): ");
-	students[next_position_student].month = get_int_in(1,12);
-	printf("\tAnnee (entier uniquement): ");
-	students[next_position_student].year = get_int();
-	printf("Entrer sa filiere: ");
-	scanf("%s", &students[next_position_student].filiere);
-	printf("Entrer son level: ");
-	scanf("%s", &students[next_position_student].level);
-	printf("Etudiant enregistree avec success\n");
+    printf("Name: ");
+    students[nb_students].name = get_string(255);
+	
+	printf("First name: ");
+	students[nb_students].first_name = get_string(255);
+	
+	printf("Birth Date\n");
+	
+	printf("\tDay (integer only): ");
+	students[nb_students].day = get_int_in(1, 31);
+	
+	printf("\tMonth (integer only): ");
+	students[nb_students].month = get_int_in(1, 12);
+	
+	printf("\tYear (integer only): ");
+	students[nb_students].year = get_int_in(1940, 2100);
+	
+	printf("Department: ");
+	students[nb_students].department = get_string(255);
+	
+	printf("Level: ");
+	students[nb_students].level = get_string(255);
+
+	nb_students++;
+	
+	printf("Student recorded successfully\n");
 }
 
-void add_subject(Subject subjects[MAX_SIZE], int next_position_subject)
+void add_course(Course* courses)
 {
-	/*On affiche les consignes a l'utilisateur*/
-    printf("Entrer le nom de la matiere: ");
-    scanf("%s", &subjects[next_position_subject].name);
-	printf("Entrer son coef (entier uniquement): ");
-	subjects[next_position_subject].coef = get_int();
-	printf("Matiere enregistree avec success\n");
+    printf("Name: ");
+    courses[nb_courses].name = get_string(255);
+	
+	printf("Coef (integer only): ");
+	courses[nb_courses].coef = get_int_in(1, 10);
+
+	nb_courses++;
+	
+	printf("Course recorded successfully\n");
 }
 
-int choose_subject(Subject subjects[MAX_SIZE], int nb_subject)
+int choose_course(Course* courses)
 {
-	/*On verifie s'il existe au moins une matiere*/
-	/*Si oui nb_subject>0*/
-    if (nb_subject)
+	// We verify if courses present
+    if (nb_courses)
     {
         int i;
         int entry = 0;
-        /*On affiche les id des matieres suivi de leur nom*/
-		for (i = 0; i < nb_subject; i++)
+
+        // We show a list of course recorded
+		for (i = 0; i < nb_courses; i++)
 		{
-			printf("%d: %s\n", i, &subjects[i].name);
+			printf("%d: %s\n", i, courses[i].name);
 		}
-		/*On demande a l'utilisateur de selectionner une matiere*/
-		/*Tant que cette matiere n'est pas dans la liste, il recommancera*/
+
 		do
         {
-            printf("Selectionner la matiere (entier uniquement): ");
-            entry = get_int();
+            printf("Select a course (integer only): ");
+            entry = get_int(2);
         }
-        while(entry >= i | entry < 0);
+        while(entry > i || entry < 0);
+
         return entry;
     }
 	else
     {
-        printf("Aucune matiere disponible\n");
-        /*On retourne un code d'erreur*/
+        printf("No course available\n");
+
         return ERROR_CODE;
     }
 }
 
-int choose_student(Student students[MAX_SIZE], int nb_student)
+int choose_student(Student* students)
 {
-	if (nb_student)
+	if (nb_students)
 	{
 		int i;
-		int entry=0;
-		/*On affiche les id des etudiants suivi de leur nom*/
-		for (i=0;i<nb_student;i++)
+		int entry = 0;
+
+		// We show the list of student recorded
+		for (i = 0; i < nb_students; i++)
 		{
-			printf("%d: %s\n", i, &students[i].name);
+			printf("%d: %s\n", i, students[i].name);
 		}
-		/*On demande a l'utilisateur de selectionner un etudiant*/
-		/*Tant que cet etudiant n'est pas dans la liste, il recommancera*/
+
 		do
         {
-            printf("Selectionner l' etudiant (entier uniquement): ");
-			entry = get_int();
+            printf("Select a student (integer only): ");
+			entry = get_int(3);
         }
-        while(entry >= i);
+        while(entry > i || entry < 0);
+
         return entry;
 	}
 	else
 	{
-		/*On retourne un code d'erreur*/
-		printf("Aucun etudiant disponible\n");
+		printf("No student available\n");
 		return ERROR_CODE;
 	}
 }
 
-void signin_subject(Note notes[MAX_SIZE], int next_position_note, int subject_id, int student_id)
+void register_course(int course_id, int student_id)
 {
-	/*On cree une structure note avec l'id de la matiere et l'id de l'etudiant*/
-	/*Avec une note de 0 par defaut*/
-	notes[next_position_note].subject_id = subject_id;
-	notes[next_position_note].student_id = student_id;
-	notes[next_position_note].note = 0;
-	printf("Matiere ajouter avec success\n");
+	notes[nb_notes].course_id = course_id;
+	notes[nb_notes].student_id = student_id;
+	notes[nb_notes].note = 0;
+
+	nb_notes++;
+
+	printf("Course recorded successfully\n");
 }
 
-void add_note(Note notes[MAX_SIZE], int nb_note, int subject_id, int student_id)
+void assign_note(int course_id, int student_id)
 {
-	/*On parcours le tableau notes*/
-	for (int i=0;i<nb_note;i++)
+	// We assign a note if the student has registered this course
+	for (int i = 0; i < nb_notes; i++)
 	{
-		/*On verifie si la note correspond a la matiere et a l'etudiant chercher*/
-		/*Si la donnee note voulu de l'etudiant est trouver, on demande a l'utilisateur d'assigner une note*/
-		if (notes[i].subject_id == subject_id & notes[i].student_id == student_id)
+		if (notes[i].course_id == course_id & notes[i].student_id == student_id)
 		{
-			printf("Entrer la note (entier uniquement): ");
-			notes[i].note = get_int();
-			printf("Note enregistree avec success\n");
+			printf("Note (integer only): ");
+			notes[i].note = get_int(2);
+			
+			printf("Note recorded successfully\n");
 			break;
 		}
 	}
 }
 
-void show_student(int student_id, Student students[MAX_SIZE], Subject subjects[MAX_SIZE], Note notes[MAX_SIZE], int next_position_note)
+void print_student(int student_id, FILE* out)
 {
-    Moyenne moyenne;
-    moyenne.nb_subject=0;
-    moyenne.note_total=0;
-	moyenne.coef_total=0;
-	int subject_id;
-	printf("Information de %s:\n", students[student_id].name);
-	printf("\tNom: %s\n", students[student_id].name);
-	printf("\tPrenom: %s\n", students[student_id].first_name);
-	printf("\tDate de naissance: %d-%d-%d\n", students[student_id].year, students[student_id].month, students[student_id].day);
-	printf("\tFiliere: %s\n", students[student_id].filiere);
-	printf("\tNiveau: %s\n", students[student_id].level);
-	printf("\tMatricule: %010d\n", student_id);
-	printf("Note:\n");
-	/*On parcours le tableau notes*/
-	for (int i=0;i<next_position_note;i++)
+    Average average;
+    average.nb_courses = 0;
+    average.note_total = 0;
+	average.coef_total = 0;
+
+	int course_id;
+
+	fprintf(out, "Information of %s:\n", students[student_id].name);
+	fprintf(out, "\tName: %s\n", students[student_id].name);
+	fprintf(out, "\tFirst name: %s\n", students[student_id].first_name);
+	fprintf(out, "\tBirth Date: %d-%d-%d\n", students[student_id].year, students[student_id].month, students[student_id].day);
+	fprintf(out, "\tDepartment: %s\n", students[student_id].department);
+	fprintf(out, "\tLevel: %s\n", students[student_id].level);
+	fprintf(out, "\tMatricule: %010d\n", student_id);
+	fprintf(out, "Note:\n");
+
+	// We print the notes of the registered course and evaluate the average
+	for (int i = 0; i < nb_notes; i++)
 	{
-		/*On verifie si la note correspond a l'etudiant chercher*/
 		if (notes[i].student_id == student_id)
 		{
-			subject_id = notes[i].subject_id;
-			moyenne.note_total += (notes[i].note*subjects[subject_id].coef);
-			moyenne.nb_subject++;
-			moyenne.coef_total += subjects[subject_id].coef;
-			printf("\t%s: %d\n", subjects[subject_id].name, notes[i].note);
+			course_id = notes[i].course_id;
+			average.note_total += (notes[i].note * courses[course_id].coef);
+			average.nb_courses++;
+			average.coef_total += courses[course_id].coef;
+
+			fprintf(out, "\t%s: %d\n", courses[course_id].name, notes[i].note);
 		}
 	}
-	/*Si moyenne.coef_total=0, on le renvoie a 1, car on peut pas diviser par 0*/
-	if(moyenne.coef_total==0)
-		moyenne.coef_total=1;
-	moyenne.moyenne = (moyenne.note_total/moyenne.coef_total);
-	printf("Moyenne: %d/%d = %.02f\n", moyenne.note_total, moyenne.coef_total, moyenne.moyenne);
+
+	if(average.coef_total == 0)
+		average.coef_total = 1;
+
+	average.average = (average.note_total / average.coef_total);
+
+	fprintf(out, "Average: %d/%d = %.02f\n", average.note_total, average.coef_total, average.average);
 }
 
-void save(Student students[MAX_SIZE], Subject subjects[MAX_SIZE], Note notes[MAX_SIZE], int student_id, int next_position_note)
+void save(int student_id)
 {
-	int subject_id;
+	int course_id;
+
 	FILE* file = NULL;
-	file = fopen("data.txt", "a+");
+	char filename[1024] = {};
+	sprintf(filename, "student_%i.txt", student_id);
+
+	file = fopen(filename, "a+");
+
 	if (file == NULL)
 	{
 		printf("Error open file\n");
 	}
 	else
 	{
-		fprintf(file, "Information de %s:\n", students[student_id].name);
-		fprintf(file, "\tNom: %s\n", students[student_id].name);
-		fprintf(file, "\tPrenom: %s\n", students[student_id].first_name);
-		fprintf(file, "\tDate de naissance: %d-%d-%d\n", students[student_id].year, students[student_id].month, students[student_id].day);
-		fprintf(file, "\tFiliere: %s\n", students[student_id].filiere);
-		fprintf(file, "\tNiveau: %s\n", students[student_id].level);
-		fprintf(file, "\tMatricule: %010d\n", student_id);
-		fprintf(file, "Note:\n");
-		/*On declare une variable moyenne qui stockera la moyenne d'un etudiant*/
-        Moyenne moyenne;
-		moyenne.nb_subject=0;
-		moyenne.note_total=0;
-		moyenne.coef_total=0;
-		/*On parcours le tableau notes*/
-		for (int i=0;i<next_position_note;i++)
-		{
-			/*On verifie si la note correspond a l'etudiant chercher*/
-			if (notes[i].student_id == student_id)
-			{
-				subject_id = notes[i].subject_id;
-				moyenne.note_total += (notes[i].note*subjects[subject_id].coef);
-				moyenne.nb_subject++;
-				moyenne.coef_total += subjects[subject_id].coef;
-				fprintf(file, "\t%s: %d\n", subjects[subject_id].name, notes[i].note);
-			}
-		}
-		/*Si moyenne.coef_total=0, on le renvoie a 1, car on peut pas diviser par 0*/
-		if(moyenne.coef_total==0)
-			moyenne.coef_total=1;
-		moyenne.moyenne = (moyenne.note_total/moyenne.coef_total);
-		fprintf(file, "Moyenne: %d/%d = %.02f\n", moyenne.note_total, moyenne.coef_total, moyenne.moyenne);
+		// We print in the file
+		print_student(student_id, file);
+
 		fclose(file);
+
 		printf("Information sauvegarder dans un fichier\n");
 	}
 }
